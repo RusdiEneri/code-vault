@@ -1,0 +1,39 @@
+name: "Sync Code Modules"
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_count:
+        description: "Jumlah PR yang dibuat dan langsung di-merge otomatis"
+        required: true
+        default: "10"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configure Git Identity
+        run: |
+          git config user.name "RusdiEneri"
+          git config user.email "nuruddinrusydiilham@gmail.com"
+
+      - name: Run Auto-PR Generator
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/sync_generator.py "${{ inputs.pr_count }}"
